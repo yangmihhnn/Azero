@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      class RowDetail extends React.component{
+        constructor(props){
+          super(props);
+        }
+        render(){
+          const colData=props.RSP_BODY.colData;
+          const rowData=props.RSP_BODY.rowData;
+          const colNum=props.RSP_BODY.totalNumOfCols;
+          const rowNum=props.RSP_BODY.totalNumOfRows;
+          const thItem=colData.map((col)=>
+            <td>{col.name}</td> 
+          );
+          const tabItem=rowData.map((row)=>
+            <tr>{colData.map((col)=><td>row.get(col)</td>)}</tr>
+          )
+          return (
+            <table>
+              <th>{thItem}</th>
+              {tabItem}
+            </table>
+          )
+        }
+      }
+      json=
+      ReactDOM.render(
+        <RowDetail RSP_BODY={json} />,
+        document.getElementById('root')
+      )
+    </script>
+  </body>
+</html>
