@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>foldableTable</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div> 
+    <script type="text/babel">
+        class Rowdetail extends React.Component{
+            //props.process
+            //props.primarykey
+            constructor(props){
+                super(props);
+                this.getJSON=this.getJSON.bind(this);
+            }
+            getJSON(){
+                const process=this.props.process;
+                const primaryKey=this.props.primarykey;
+                const jsontext='{ "colData":[ {"dataType": "String", "field": "system", "name": "涉及系统"}, {"dataType": "String", "field": "code", "name": "编号"}, {"dataType": "String", "field": "name", "name": "姓名"} ], "rowData":[ {"code": "TEST", "name": "张三", "system": "在线客服"}, {"code": "NULL", "name": "王五", "system": "平台"}, {"code": "", "name": "李四", "system": "托管"}, {"code": "", "name": "小明", "system": "估值"} ], "totalNumOfCols":"3", "totalNumOfRows":"4" }  '
+                const json=JSON.parse(jsontext);
+                return json;
+            }
+            render(){
+                let json=this.getJSON();
+                const colData=Object.values(json.colData);
+                const rowData=Object.values(json.rowData); 
+                const thItem=colData.map((col)=>
+                    <th>{col.name}</th>
+                );
+                const trItem=rowData.map((row)=>{
+                    const tdItem=colData.map((col)=>
+                        <td>{row[col.field]}</td>
+                    );
+                return <tr style={{"background-color": "#F5F5F5"}}>{tdItem}</tr>;
+                }); 
+                return (
+                    <tr>
+                        <div style={{"padding-left":"30px"}} >
+                            <table>
+                                <tbody>
+                                    <tr style={{"background-color": "#0000005c"}}>{thItem}</tr>
+                                   {trItem}
+                                </tbody>
+                            </table>
+                        </div>
+                    </tr>
+                    );
+            }
+        }
+        class Tablerows extends React.Component{
+            //props.rows 
+            //props.colorder
+            //props.process
+            //props.primarykey
+            //props.floadnum
+            constructor(props){
+                super(props);
+                this.handleClick=this.handleClick.bind(this);
+                this.state = {floadnum : 0}
+            }
+            handleClick(index){
+                if(index==this.state.floadnum){
+                    this.setState({floadnum : 0})
+                }
+                else{
+                    this.setState({floadnum : index})
+                }
+            }
+            render(){
+                //rows为所有行数据，colorder 为列顺序
+                const colData=this.props.colorder;
+                const rowData=this.props.rows; 
+                const thItem=colData.map((col)=>
+                    <th>{col.name}</th>
+                );
+                const trItem=rowData.map((row,index)=>{
+                    const tdItem=colData.map((col)=>
+                        <td>{row[col]}</td>
+                    );
+                return <tr style={{"background-color": "#F5F5F5"}} onClick={this.handleClick.bind(this,index+1)}>{tdItem}</tr>;
+                }); 
+                if(this.state.floadnum){
+                            trItem.splice(this.state.floadnum,0,<Rowdetail process={this.props.process} primarykey={rowData[this.state.floadnum-1].primarykey}/>)
+                }
+                return (
+                    <tbody>
+                        {trItem}
+                    </tbody>
+                );
+                
+            }
+        }
+        class TableHead extends React.Component{
+            //props.colnames
+            constructor(props){
+                super(props);
+            }
+            render(){
+                const colnames=this.props.colnames;
+                const thItem=colnames.map((colname)=>
+                    <th>{colname}</th>
+                );
+                return <thead><tr>{thItem}</tr></thead>
+            }
+        }
+        class TablePage extends React.Component{
+            render(){
+                return <p></p>
+            }
+        }
+        class SearchBar extends React.Component{
+            render(){
+                return <input></input>
+            }
+        }
+        class Table extends React.Component{
+            constructor(props){
+                super(props);
+            }
+            render(){
+                const jsontext='{ "colData":[ {"dataType": "String", "field": "system", "name": "涉及系统"}, {"dataType": "String", "field": "code", "name": "编号"}, {"dataType": "String", "field": "name", "name": "姓名"} ], "rowData":[ {"code": "TEST", "name": "张三", "system": "在线客服"}, {"code": "NULL", "name": "王五", "system": "平台"}, {"code": "", "name": "李四", "system": "托管"}, {"code": "", "name": "小明", "system": "估值"} ], "totalNumOfCols":"3", "totalNumOfRows":"4" }  '
+                const json=JSON.parse(jsontext);
+                const colname =["涉及系统","编号","姓名"];
+                const colorder=["system","code","name"];
+                const rows=Object.values(json.rowData);
+                return (
+                    <table>
+                        <TableHead colnames={colname} /> 
+                        <Tablerows rows={rows} colorder={colorder}  />
+                    </table>
+                );
+            } 
+        }
+        
+        ReactDOM.render(
+            <Table />,
+            document.getElementById('root')
+        )
+   </script>
+</body>
+</html>

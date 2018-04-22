@@ -10,32 +10,39 @@
   <body>
     <div id="root"></div>
     <script type="text/babel">
-      class RowDetail extends React.component{
+      const jsontext='{ "colData":[ {"dataType": "String", "field": "system", "name": "涉及系统"}, {"dataType": "String", "field": "code", "name": "编号"}, {"dataType": "String", "field": "name", "name": "姓名"} ], "rowData":[ {"code": "TEST", "name": "张三", "system": "在线客服"}, {"code": "NULL", "name": "王五", "system": "平台"}, {"code": "", "name": "李四", "system": "托管"}, {"code": "", "name": "小明", "system": "估值"} ], "totalNumOfCols":"3", "totalNumOfRows":"4" }  '
+      const json=JSON.parse(jsontext);
+      class JsonToTable extends React.Component {
         constructor(props){
           super(props);
         }
         render(){
-          const colData=props.RSP_BODY.colData;
-          const rowData=props.RSP_BODY.rowData;
-          const colNum=props.RSP_BODY.totalNumOfCols;
-          const rowNum=props.RSP_BODY.totalNumOfRows;
+          const colData=Object.values(this.props.RSP_BODY.colData);
+          const rowData=Object.values(this.props.RSP_BODY.rowData);
+          const colNum=this.props.RSP_BODY.totalNumOfCols;
+          const rowNum=this.props.RSP_BODY.totalNumOfRows;
           const thItem=colData.map((col)=>
-            <td>{col.name}</td> 
+            <th>{col.name}</th> 
           );
-          const tabItem=rowData.map((row)=>
-            <tr>{colData.map((col)=><td>row.get(col)</td>)}</tr>
-          )
+          const tbItem=rowData.map((row)=>{
+            const tdItem=colData.map((col)=>
+              <td>{row[col.field]}</td>
+            );
+            return <tr>{tdItem}</tr>;
+          });
           return (
             <table>
-              <th>{thItem}</th>
-              {tabItem}
+              <tbody>
+                <tr>{thItem}</tr>
+                {tbItem}
+              </tbody>
             </table>
-          )
+          );
         }
       }
-      json=
+
       ReactDOM.render(
-        <RowDetail RSP_BODY={json} />,
+        <JsonToTable RSP_BODY={json} />,
         document.getElementById('root')
       )
     </script>
