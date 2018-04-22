@@ -62,15 +62,9 @@
             constructor(props){
                 super(props);
                 this.handleClick=this.handleClick.bind(this);
-                this.state = {floadnum : 0}
             }
             handleClick(index){
-                if(index==this.state.floadnum){
-                    this.setState({floadnum : 0})
-                }
-                else{
-                    this.setState({floadnum : index})
-                }
+                this.props.onFloadChange(index);
             }
             render(){
                 //rows为所有行数据，colorder 为列顺序
@@ -85,8 +79,8 @@
                     );
                 return <tr style={{"background-color": "#F5F5F5"}} onClick={this.handleClick.bind(this,index+1)}>{tdItem}</tr>;
                 }); 
-                if(this.state.floadnum){
-                            trItem.splice(this.state.floadnum,0,<Rowdetail process={this.props.process} primarykey={rowData[this.state.floadnum-1].primarykey}/>)
+                if(this.props.floadnum){
+                            trItem.splice(this.props.floadnum,0,<Rowdetail process={this.props.process} primarykey={rowData[this.props.floadnum-1].primarykey}/>)
                 }
                 return (
                     <tbody>
@@ -110,8 +104,30 @@
             }
         }
         class TablePage extends React.Component{
+            //props.totalnum
+            //props.crtpage
+            //props.pagesize
+            //props.onPageChange(index)
+            constructor(props){
+               super(props);
+               this.handleClick=this.handleClick.bind(this);
+            }
+            handleClick(index){
+                this.props.onPageChange(index);
+            }
             render(){
-                return <p></p>
+                const totalnum=this.props.totalnum;
+                const pagesize=this.props.pagesize;
+                const pagenum=totalnum/pagesize+1;
+                const pagebar=[];
+                for(let i=0;i<pagesize;i++){
+                    if(i!=this.props.crtpage-1){
+                       pagebar.push(<span onClick={this.handleClick.bind(this,i+1)}>{i+1}</span>);
+                    }else{
+                       pagebar.push(<span style={{"color":"red"}}>{i+1}</span>)
+                    }
+                }
+                return <tfoot>{pagebar}</tfoot>
             }
         }
         class SearchBar extends React.Component{
@@ -122,6 +138,20 @@
         class Table extends React.Component{
             constructor(props){
                 super(props);
+                this.state ={crtpage:1,floadnum:0};
+                this.onPageChange=this.onPageChange.bind(this);
+                this.onFloadChange=this.onFloadChange.bind(this);
+            }
+            onPageChange(index){
+                this.setState({crtpage:index,floadnum:0});
+            }
+            onFloadChange(index){
+                if(index==this.state.floadnum){
+                    this.setState({floadnum : 0})
+                }
+                else{
+                    this.setState({floadnum : index})
+                }
             }
             render(){
                 const jsontext='{ "colData":[ {"dataType": "String", "field": "system", "name": "涉及系统"}, {"dataType": "String", "field": "code", "name": "编号"}, {"dataType": "String", "field": "name", "name": "姓名"} ], "rowData":[ {"code": "TEST", "name": "张三", "system": "在线客服"}, {"code": "NULL", "name": "王五", "system": "平台"}, {"code": "", "name": "李四", "system": "托管"}, {"code": "", "name": "小明", "system": "估值"} ], "totalNumOfCols":"3", "totalNumOfRows":"4" }  '
@@ -129,14 +159,24 @@
                 const colname =["涉及系统","编号","姓名"];
                 const colorder=["system","code","name"];
                 const rows=Object.values(json.rowData);
+                const pagesize=2;
+                const totalnum=4;
+                const i=(this.state.crtpage-1)*pagesize+1;
+                const j=this.state.crtpage*pagesize;
+                const pagerow=[];
+                for(let p=i;p<=j;p++){
+                    pagerow.push(rows[p-1]);
+                }
                 return (
                     <table>
                         <TableHead colnames={colname} /> 
-                        <Tablerows rows={rows} colorder={colorder}  />
+                        <Tablerows rows={pagerow} colorder={colorder} onFloadChange={this.onFloadChange} floadnum={this.state.floadnum}/>
+                        <TablePage totalnum={totalnum} crtpage={this.state.crtpage} pagesize={pagesize} onPageChange={this.onPageChange}/>
                     </table>
                 );
             } 
         }
+        
         
         ReactDOM.render(
             <Table />,
